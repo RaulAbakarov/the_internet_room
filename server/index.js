@@ -88,8 +88,8 @@ setInterval(() => {
 /**
  * Check for stale locks periodically
  */
-setInterval(() => {
-  const result = checkStaleLocks(CONFIG.HEARTBEAT_TIMEOUT, CONFIG.HARD_SESSION_TIMEOUT);
+setInterval(async () => {
+  const result = await checkStaleLocks(CONFIG.HEARTBEAT_TIMEOUT, CONFIG.HARD_SESSION_TIMEOUT);
   if (result.released) {
     console.log(`[SERVER] Lock released due to: ${result.reason}`);
   }
@@ -103,27 +103,32 @@ setInterval(() => {
  * GET /api/status
  * Check room occupancy status
  */
-app.get('/api/status', (req, res) => {
-  const state = getState();
-  
-  const response = {
-    occupied: state.is_occupied
-  };
-  
-  // If occupied, include how long (rounded to minutes)
-  if (state.is_occupied && state.occupied_since) {
-    const elapsed = Date.now() - state.occupied_since;
-    response.occupiedMinutes = Math.floor(elapsed / 60000);
+app.get('/api/status', async (req, res) => {
+  try {
+    const state = await getState();
+    
+    const response = {
+      occupied: state.is_occupied
+    };
+    
+    // If occupied, include how long (rounded to minutes)
+    if (state.is_occupied && state.occupied_since) {
+      const elapsed = Date.now() - state.occupied_since;
+      response.occupiedMinutes = Math.floor(elapsed / 60000);
+    }
+    
+    res.json(response);
+  } catch (err) {
+    console.error('Error in /api/status:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-  
-  res.json(response);
 });
 
 /**
  * POST /api/enter
  * Attempt to enter the room
  */
-app.post('/api/enter', (req, res) => {
+app.post('/api/enter', async (req, res) => {
   const ip = req.ip || req.connection.remoteAddress;
   
   // Rate limiting
@@ -134,40 +139,45 @@ app.post('/api/enter', (req, res) => {
     });
   }
   
-  // Generate session ID
-  const sessionId = uuidv4();
-  
-  // Attempt to acquire lock
-  const result = acquireLock(sessionId);
-  
-  if (!result.success) {
-    return res.json({ 
-      success: false, 
-      error: 'Room is occupied' 
-    });
-  }
-  
-  // Get previous content to show the new visitor
-  const content = getRoomContent();
-  
-  console.log(`[ENTRY] New session: ${sessionId.slice(0, 8)}... from ${ip}`);
-  
-  res.json({
-    success: true,
-    sessionId,
-    content,
-    config: {
-      heartbeatInterval: CONFIG.HEARTBEAT_INTERVAL,
-      maxTextLength: CONFIG.MAX_TEXT_LENGTH
+  try {
+    // Generate session ID
+    const sessionId = uuidv4();
+    
+    // Attempt to acquire lock
+    const result = await acquireLock(sessionId);
+    
+    if (!result.success) {
+      return res.json({ 
+        success: false, 
+        error: 'Room is occupied' 
+      });
     }
-  });
+    
+    // Get previous content to show the new visitor
+    const content = await getRoomContent();
+    
+    console.log(`[ENTRY] New session: ${sessionId.slice(0, 8)}... from ${ip}`);
+    
+    res.json({
+      success: true,
+      sessionId,
+      content,
+      config: {
+        heartbeatInterval: CONFIG.HEARTBEAT_INTERVAL,
+        maxTextLength: CONFIG.MAX_TEXT_LENGTH
+      }
+    });
+  } catch (err) {
+    console.error('Error in /api/enter:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 
 /**
  * POST /api/heartbeat
  * Keep the session alive
  */
-app.post('/api/heartbeat', (req, res) => {
+app.post('/api/heartbeat', async (req, res) => {
   const { sessionId, content } = req.body;
   const ip = req.ip || req.connection.remoteAddress;
   
@@ -180,88 +190,108 @@ app.post('/api/heartbeat', (req, res) => {
     return res.status(429).json({ success: false, error: 'Too many heartbeats' });
   }
   
-  // Update heartbeat
-  const result = updateHeartbeat(sessionId);
-  
-  if (!result.success) {
-    return res.json({ 
-      success: false, 
-      error: 'Session expired or invalid',
-      terminated: true
-    });
+  try {
+    // Update heartbeat
+    const result = await updateHeartbeat(sessionId);
+    
+    if (!result.success) {
+      return res.json({ 
+        success: false, 
+        error: 'Session expired or invalid',
+        terminated: true
+      });
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error in /api/heartbeat:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
-  
-  res.json({ success: true });
 });
 
 /**
  * POST /api/leave
  * Leave the room and save content
  */
-app.post('/api/leave', (req, res) => {
+app.post('/api/leave', async (req, res) => {
   const { sessionId, content } = req.body;
   
   if (!sessionId) {
     return res.status(400).json({ success: false, error: 'Missing session ID' });
   }
   
-  // Validate and sanitize content
-  let sanitizedContent = null;
-  if (content) {
-    sanitizedContent = {
-      text: typeof content.text === 'string' 
-        ? content.text.slice(0, CONFIG.MAX_TEXT_LENGTH) 
-        : '',
-      drawing: content.drawing || null
-    };
+  try {
+    // Validate and sanitize content
+    let sanitizedContent = null;
+    if (content) {
+      sanitizedContent = {
+        text: typeof content.text === 'string' 
+          ? content.text.slice(0, CONFIG.MAX_TEXT_LENGTH) 
+          : '',
+        drawing: content.drawing || null
+      };
+    }
+    
+    // Release lock and save content
+    const result = await releaseLock(sessionId, sanitizedContent);
+    
+    if (!result.success) {
+      console.log(`[LEAVE] Failed for session ${sessionId.slice(0, 8)}...: ${result.reason}`);
+      return res.json({ success: false, error: result.reason });
+    }
+    
+    console.log(`[LEAVE] Session ended: ${sessionId.slice(0, 8)}...`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error in /api/leave:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
-  
-  // Release lock and save content
-  const result = releaseLock(sessionId, sanitizedContent);
-  
-  if (!result.success) {
-    console.log(`[LEAVE] Failed for session ${sessionId.slice(0, 8)}...: ${result.reason}`);
-    return res.json({ success: false, error: result.reason });
-  }
-  
-  console.log(`[LEAVE] Session ended: ${sessionId.slice(0, 8)}...`);
-  res.json({ success: true });
 });
 
 /**
  * POST /api/admin/clear
  * Emergency room clearing (admin only)
  */
-app.post('/api/admin/clear', (req, res) => {
+app.post('/api/admin/clear', async (req, res) => {
   const { secret } = req.body;
   
   if (secret !== CONFIG.ADMIN_SECRET) {
     return res.status(403).json({ success: false, error: 'Forbidden' });
   }
   
-  const result = forceClear();
-  console.log('[ADMIN] Room forcibly cleared');
-  
-  res.json({ success: true });
+  try {
+    await forceClear();
+    console.log('[ADMIN] Room forcibly cleared');
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error in /api/admin/clear:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 
 /**
  * GET /api/admin/status
  * Full room status (admin only)
  */
-app.get('/api/admin/status', (req, res) => {
+app.get('/api/admin/status', async (req, res) => {
   const secret = req.headers['x-admin-secret'];
   
   if (secret !== CONFIG.ADMIN_SECRET) {
     return res.status(403).json({ success: false, error: 'Forbidden' });
   }
   
-  const state = getState();
-  res.json({ 
-    success: true, 
-    state,
-    config: CONFIG
-  });
+  try {
+    const state = await getState();
+    res.json({ 
+      success: true, 
+      state,
+      config: CONFIG
+    });
+  } catch (err) {
+    console.error('Error in /api/admin/status:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 
 // Serve the main page for all other routes
