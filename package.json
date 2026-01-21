@@ -1,0 +1,18 @@
+{
+  "name": "the-internet-room",
+  "version": "1.0.0",
+  "description": "A minimalist shared digital room - one visitor at a time",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "keywords": ["minimalist", "anonymous", "art-installation"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  }
+}

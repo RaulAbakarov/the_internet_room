@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Internet Room</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Landing Page -->
+  <div id="landing" class="screen">
+    <div class="landing-content">
+      <h1>The Internet Room</h1>
+      <p class="subtitle">One room. One visitor.</p>
+      
+      <div id="status-display">
+        <div id="status-loading" class="status">
+          <span class="pulse"></span>
+          <span>Checking...</span>
+        </div>
+        
+        <div id="status-vacant" class="status hidden">
+          <p>The room is empty.</p>
+          <button id="enter-btn" class="enter-button">Enter the Room</button>
+        </div>
+        
+        <div id="status-occupied" class="status hidden">
+          <p>Someone is inside.</p>
+          <p id="occupied-time" class="occupied-time"></p>
+        </div>
+        
+        <div id="status-error" class="status hidden">
+          <p class="error-text">Unable to connect.</p>
+          <button id="retry-btn" class="retry-button">Try Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The Room -->
+  <div id="room" class="screen hidden">
+    <div class="room-container">
+      <!-- Previous content display -->
+      <div id="previous-content" class="previous-content">
+        <p class="previous-label">left behind:</p>
+        <div id="previous-text" class="previous-text"></div>
+        <canvas id="previous-canvas" class="previous-canvas hidden"></canvas>
+        <div id="no-content" class="no-content hidden">
+          <em>The room was empty.</em>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider"></div>
+
+      <!-- User input area -->
+      <div class="input-area">
+        <p class="input-label">leave something:</p>
+        
+        <!-- Text input -->
+        <textarea 
+          id="text-input" 
+          class="text-input" 
+          placeholder="Write something..."
+          maxlength="500"
+        ></textarea>
+        <div class="char-count">
+          <span id="char-current">0</span> / <span id="char-max">500</span>
+        </div>
+
+        <!-- Drawing canvas -->
+        <div class="canvas-section">
+          <div class="canvas-toggle">
+            <button id="toggle-canvas" class="toggle-btn">+ Add drawing</button>
+          </div>
+          <div id="canvas-container" class="canvas-container hidden">
+            <canvas id="drawing-canvas" width="400" height="200"></canvas>
+            <div class="canvas-controls">
+              <button id="clear-canvas" class="canvas-btn">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leave button -->
+      <div class="leave-section">
+        <button id="leave-btn" class="leave-button">Leave the Room</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaving overlay -->
+  <div id="leaving-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <p>Leaving...</p>
+    </div>
+  </div>
+
+  <!-- Terminated overlay -->
+  <div id="terminated-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <p>Your time has ended.</p>
+      <button id="terminated-ok" class="ok-button">OK</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+/**
+ * The Internet Room - Styles
+ * Minimalist, neutral, distraction-free
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #fafafa;
+  --bg-room: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #666666;
+  --text-light: #999999;
+  --border: #e0e0e0;
+  --border-dark: #cccccc;
+  --accent: #333333;
+  --error: #cc4444;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+               'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Screens */
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ================================
+   Landing Page
+   ================================ */
+
+#landing {
+  background: var(--bg);
+}
+
+.landing-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+}
+
+.landing-content h1 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 3rem;
+}
+
+.status {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.status p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Loading pulse */
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-light);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Occupied time */
+.occupied-time {
+  font-size: 0.8rem;
+  color: var(--text-light) !important;
+}
+
+/* Buttons */
+.enter-button {
+  padding: 1rem 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.enter-button:hover {
+  opacity: 0.85;
+}
+
+.enter-button:active {
+  transform: scale(0.98);
+}
+
+.enter-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.retry-button {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.85rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.retry-button:hover {
+  border-color: var(--text-muted);
+}
+
+.error-text {
+  color: var(--error) !important;
+}
+
+/* ================================
+   The Room
+   ================================ */
+
+#room {
+  background: var(--bg-room);
+  padding: 2rem;
+}
+
+.room-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Previous content */
+.previous-content {
+  padding: 1.5rem 0;
+}
+
+.previous-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+.previous-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.previous-canvas {
+  max-width: 100%;
+  border: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+.no-content {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+}
+
+/* Input area */
+.input-area {
+  padding: 1rem 0;
+}
+
+.input-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--text-muted);
+}
+
+.text-input::placeholder {
+  color: var(--text-light);
+}
+
+.char-count {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+/* Canvas section */
+.canvas-section {
+  margin-top: 1.5rem;
+}
+
+.toggle-btn {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.toggle-btn:hover {
+  color: var(--text);
+}
+
+.canvas-container {
+  margin-top: 1rem;
+}
+
+#drawing-canvas {
+  width: 100%;
+  max-width: 400px;
+  height: 200px;
+  border: 1px solid var(--border);
+  cursor: crosshair;
+  touch-action: none;
+  background: #fff;
+}
+
+.canvas-controls {
+  margin-top: 0.5rem;
+}
+
+.canvas-btn {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.canvas-btn:hover {
+  color: var(--text-muted);
+}
+
+/* Leave section */
+.leave-section {
+  padding-top: 2rem;
+  text-align: center;
+}
+
+.leave-button {
+  padding: 0.75rem 2rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.leave-button:hover {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* ================================
+   Overlays
+   ================================ */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  text-align: center;
+}
+
+.overlay-content p {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.ok-button {
+  padding: 0.5rem 2rem;
+  font-size: 0.9rem;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+}
+
+.ok-button:hover {
+  opacity: 0.85;
+}
+
+/* ================================
+   Responsive
+   ================================ */
+
+@media (max-width: 600px) {
+  #room {
+    padding: 1rem;
+  }
+  
+  .room-container {
+    gap: 1.5rem;
+  }
+  
+  .text-input {
+    min-height: 100px;
+  }
+  
+  #drawing-canvas {
+    height: 150px;
+  }
+}
